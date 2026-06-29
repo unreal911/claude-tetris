@@ -40,7 +40,9 @@ jobs:
             4. Asigna los labels con: gh issue edit ${{ github.event.issue.number }} --add-label "label1,label2"
             5. Publica UN comentario de diagnóstico con: gh issue comment ${{ github.event.issue.number }} --body "..."
 
-            El comentario de diagnóstico debe estar en español y contener:
+            El comentario de diagnóstico debe estar en español, escrito en
+            formato Markdown válido (usa encabezados, listas, **negritas** y
+            `código` en línea o bloques ``` cuando corresponda), y contener:
             - **Resumen**: qué pide o reporta el issue en 1-2 frases.
             - **Diagnóstico**: causa probable o área del código afectada. Referencia
               archivos/funciones concretas (game.js, index.html, style.css) cuando sea posible.
