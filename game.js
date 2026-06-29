@@ -39,6 +39,22 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const themeToggle = document.getElementById('theme-toggle');
+
+function getThemeColor(varName) {
+  return getComputedStyle(document.body).getPropertyValue(varName).trim();
+}
+
+(function initTheme() {
+  const saved = localStorage.getItem('tetris-theme');
+  if (saved === 'light') document.body.dataset.theme = 'light';
+})();
+
+themeToggle.addEventListener('click', () => {
+  const isLight = document.body.dataset.theme === 'light';
+  document.body.dataset.theme = isLight ? 'dark' : 'light';
+  localStorage.setItem('tetris-theme', document.body.dataset.theme);
+});
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
@@ -162,14 +178,13 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
   context.globalAlpha = alpha ?? 1;
   context.fillStyle = color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
+  context.fillStyle = getThemeColor('--highlight');
   context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
   context.globalAlpha = 1;
 }
 
 function drawGrid() {
-  ctx.strokeStyle = '#22222e';
+  ctx.strokeStyle = getThemeColor('--grid-line');
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -186,7 +201,8 @@ function drawGrid() {
 }
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = getThemeColor('--bg-board');
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   drawGrid();
 
   // board
@@ -209,7 +225,8 @@ function draw() {
 
 function drawNext() {
   const NB = 30;
-  nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  nextCtx.fillStyle = getThemeColor('--bg-board');
+  nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
