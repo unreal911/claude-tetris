@@ -4,15 +4,58 @@
   padding: 0;
 }
 
+:root {
+  --bg-body: #0f0f17;
+  --bg-board: #1a1a25;
+  --border-board: #2a2a3a;
+  --grid-line: #22222e;
+  --text-primary: #e0e0e0;
+  --text-label: #555570;
+  --text-controls: #888;
+  --accent: #7aa2f7;
+  --accent-hover: #9bbdff;
+  --accent-glow: rgba(122, 162, 247, 0.3);
+  --shadow-board: rgba(0, 0, 0, 0.6);
+  --kbd-bg: #22223a;
+  --kbd-border: #3a3a5a;
+  --kbd-text: #aaa;
+  --overlay-bg: rgba(10, 10, 20, 0.75);
+  --overlay-title: #e57373;
+  --btn-text: #0f0f17;
+  --highlight: rgba(255, 255, 255, 0.12);
+}
+
+body[data-theme="light"] {
+  --bg-body: #e8e8f0;
+  --bg-board: #ffffff;
+  --border-board: #c0c0d0;
+  --grid-line: #e0e0ea;
+  --text-primary: #1a1a2e;
+  --text-label: #6a6a80;
+  --text-controls: #555;
+  --accent: #4a6fc7;
+  --accent-hover: #3a5fb7;
+  --accent-glow: rgba(74, 111, 199, 0.3);
+  --shadow-board: rgba(0, 0, 0, 0.15);
+  --kbd-bg: #d8d8e8;
+  --kbd-border: #b0b0c8;
+  --kbd-text: #444;
+  --overlay-bg: rgba(200, 200, 220, 0.8);
+  --overlay-title: #c0392b;
+  --btn-text: #ffffff;
+  --highlight: rgba(255, 255, 255, 0.25);
+}
+
 body {
-  background: #0f0f17;
-  color: #e0e0e0;
+  background: var(--bg-body);
+  color: var(--text-primary);
   font-family: system-ui, -apple-system, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
   user-select: none;
+  transition: background 0.3s, color 0.3s;
 }
 
 .wrapper {
@@ -24,9 +67,9 @@ body {
   font-size: 42px;
   font-weight: 800;
   letter-spacing: 12px;
-  color: #7aa2f7;
+  color: var(--accent);
   margin-bottom: 18px;
-  text-shadow: 0 0 20px rgba(122, 162, 247, 0.3);
+  text-shadow: 0 0 20px var(--accent-glow);
 }
 
 .game-container {
@@ -37,10 +80,11 @@ body {
 
 #board {
   display: block;
-  border: 1px solid #2a2a3a;
-  background: #1a1a25;
+  border: 1px solid var(--border-board);
+  background: var(--bg-board);
   border-radius: 4px;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 40px var(--shadow-board);
+  transition: background 0.3s, border-color 0.3s;
 }
 
 /* ---- Panel lateral ---- */
@@ -61,7 +105,7 @@ body {
 .label {
   font-size: 10px;
   letter-spacing: 2px;
-  color: #555570;
+  color: var(--text-label);
   font-weight: 600;
 }
 
@@ -69,16 +113,44 @@ body {
   font-family: 'Courier New', Courier, monospace;
   font-size: 26px;
   font-weight: 700;
-  color: #7aa2f7;
+  color: var(--accent);
   letter-spacing: 1px;
 }
 
 #next-canvas {
   display: block;
-  border: 1px solid #2a2a3a;
-  background: #1a1a25;
+  border: 1px solid var(--border-board);
+  background: var(--bg-board);
   border-radius: 4px;
+  transition: background 0.3s, border-color 0.3s;
 }
+
+/* ---- Theme Toggle ---- */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border-board);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text-primary);
+  transition: border-color 0.3s, background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  background: var(--kbd-bg);
+}
+
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: inline; }
+
+body[data-theme="light"] .theme-toggle .icon-sun { display: inline; }
+body[data-theme="light"] .theme-toggle .icon-moon { display: none; }
 
 /* ---- Controles ---- */
 .controls ul {
@@ -90,20 +162,21 @@ body {
 
 .controls li {
   font-size: 12px;
-  color: #888;
+  color: var(--text-controls);
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
 kbd {
-  background: #22223a;
-  border: 1px solid #3a3a5a;
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
   border-radius: 3px;
   padding: 1px 6px;
   font-size: 11px;
   font-family: inherit;
-  color: #aaa;
+  color: var(--kbd-text);
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
 }
 
 /* ---- Overlay ---- */
@@ -113,7 +186,7 @@ kbd {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 10, 20, 0.75);
+  background: var(--overlay-bg);
   backdrop-filter: blur(4px);
   border-radius: 4px;
 }
@@ -134,19 +207,19 @@ kbd {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: 4px;
-  color: #e57373;
+  color: var(--overlay-title);
 }
 
 #overlay-score {
   font-family: 'Courier New', Courier, monospace;
   font-size: 14px;
-  color: #7aa2f7;
+  color: var(--accent);
 }
 
 #restart-btn {
   margin-top: 8px;
-  background: #7aa2f7;
-  color: #0f0f17;
+  background: var(--accent);
+  color: var(--btn-text);
   border: none;
   border-radius: 6px;
   padding: 10px 28px;
@@ -158,5 +231,5 @@ kbd {
 }
 
 #restart-btn:hover {
-  background: #9bbdff;
+  background: var(--accent-hover);
 }
