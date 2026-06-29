@@ -1,0 +1,50 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  triage:
+    # Solo el cuerpo principal del issue (no comentarios). Evita re-disparos
+    # entre Claude y sí mismo si editara el issue.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write       # Necesario para asignar labels y comentar
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Issue Triage
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh issue edit:*),Bash(gh issue comment:*),Bash(gh label list:*),Bash(gh label create:*)"'
+          prompt: |
+            Eres el triador de issues de este repositorio (un Tetris en JS vanilla).
+            El issue a analizar es el número ${{ github.event.issue.number }} del repo ${{ github.repository }}.
+
+            Pasos:
+            1. Lee el issue con: gh issue view ${{ github.event.issue.number }}
+            2. Lista los labels disponibles con: gh label list
+            3. Decide qué labels aplican (tipo: bug/enhancement/question/documentation;
+               y prioridad si corresponde). Si un label claramente necesario no existe,
+               créalo con gh label create. No inventes labels exóticos; reutiliza los existentes.
+            4. Asigna los labels con: gh issue edit ${{ github.event.issue.number }} --add-label "label1,label2"
+            5. Publica UN comentario de diagnóstico con: gh issue comment ${{ github.event.issue.number }} --body "..."
+
+            El comentario de diagnóstico debe estar en español y contener:
+            - **Resumen**: qué pide o reporta el issue en 1-2 frases.
+            - **Diagnóstico**: causa probable o área del código afectada. Referencia
+              archivos/funciones concretas (game.js, index.html, style.css) cuando sea posible.
+            - **Plan de solución**: pasos concretos que servirán luego para implementar el fix.
+            - **Dudas/Riesgos**: información faltante o riesgos a considerar.
+
+            Sé conciso y técnico. No implementes código, solo diagnostica.
