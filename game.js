@@ -13,6 +13,12 @@ const COLORS = [
   '#e57373', // Z - red
   '#b0bef3', // J - pale indigo
   '#ffb74d', // L - orange
+  // --- especiales (aparecen ocasionalmente) ---
+  '#f06292', // + pentominó - rosa
+  '#4db6ac', // L pentominó - teal
+  '#aed581', // T pentominó - lima
+  '#64b5f6', // U pentominó - azul
+  '#7986cb', // 3x3 hueca (reto) - indigo
 ];
 
 const PIECES = [
@@ -24,7 +30,17 @@ const PIECES = [
   [[5,5,0],[0,5,5],[0,0,0]],                  // Z
   [[6,0,0],[6,6,6],[0,0,0]],                  // J
   [[0,0,7],[7,7,7],[0,0,0]],                  // L
+  // --- especiales ---
+  [[0,8,0],[8,8,8],[0,8,0]],                  // + (pentominó plus)
+  [[9,0],[9,0],[9,0],[9,9]],                  // L pentominó
+  [[10,10,10],[0,10,0],[0,10,0]],             // T pentominó
+  [[11,0,11],[11,11,11],[0,0,0]],             // U pentominó
+  [[12,12,12],[12,0,12],[12,12,12]],          // 3x3 hueca (reto)
 ];
+
+// La primera pieza especial en PIECES (resto son especiales hasta el final)
+const FIRST_SPECIAL = 8;
+const SPECIAL_CHANCE = 0.15;
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
 
@@ -32,6 +48,8 @@ const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
 const nextCtx = nextCanvas.getContext('2d');
+const currentCanvas = document.getElementById('current-canvas');
+const currentCtx = currentCanvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const linesEl = document.getElementById('lines');
 const levelEl = document.getElementById('level');
@@ -63,7 +81,12 @@ function createBoard() {
 }
 
 function randomPiece() {
-  const type = Math.floor(Math.random() * 7) + 1;
+  let type;
+  if (Math.random() < SPECIAL_CHANCE) {
+    type = FIRST_SPECIAL + Math.floor(Math.random() * (PIECES.length - FIRST_SPECIAL));
+  } else {
+    type = Math.floor(Math.random() * 7) + 1;
+  }
   const shape = PIECES[type].map(row => [...row]);
   return { type, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
 }
@@ -97,6 +120,7 @@ function tryRotate() {
     if (!collide(rotated, current.x + kick, current.y)) {
       current.shape = rotated;
       current.x += kick;
+      drawCurrent();
       return;
     }
   }
@@ -164,6 +188,7 @@ function spawn() {
     endGame();
   }
   drawNext();
+  drawCurrent();
 }
 
 function updateHUD() {
@@ -223,16 +248,23 @@ function draw() {
       drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK);
 }
 
-function drawNext() {
+function drawPreview(context, cvs, shape) {
   const NB = 30;
-  nextCtx.fillStyle = getThemeColor('--bg-board');
-  nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
-  const shape = next.shape;
+  context.fillStyle = getThemeColor('--bg-board');
+  context.fillRect(0, 0, cvs.width, cvs.height);
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
   for (let r = 0; r < shape.length; r++)
     for (let c = 0; c < shape[r].length; c++)
-      drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
+      drawBlock(context, offX + c, offY + r, shape[r][c], NB);
+}
+
+function drawNext() {
+  drawPreview(nextCtx, nextCanvas, next.shape);
+}
+
+function drawCurrent() {
+  drawPreview(currentCtx, currentCanvas, current.shape);
 }
 
 function endGame() {
